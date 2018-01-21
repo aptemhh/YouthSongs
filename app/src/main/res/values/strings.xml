@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">YouthSongs</string>
+    <integer name="min_value_seek_bar">20</integer>
+</resources>
