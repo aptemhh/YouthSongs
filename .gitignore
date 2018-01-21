@@ -51,5 +51,5 @@ proguard/
 #Gradle
 .gradletasknamecache
 .gradle/
-build/
+build/*
 bin/
