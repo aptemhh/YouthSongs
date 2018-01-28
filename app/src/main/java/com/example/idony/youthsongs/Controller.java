@@ -1,13 +1,19 @@
 package com.example.idony.youthsongs;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +51,17 @@ public final class Controller {
     }
 
     public void loadResource(Context context) {
-        songs = initSong(context);
+
+        try (InputStream in_s = new FileInputStream(context.getFilesDir().getAbsolutePath()
+                + "/fileDownload.xml")) {
+            songs = initSong(in_s);
+        } catch (IOException e) {
+            try (InputStream in_s = context.getAssets().open("textSong.xml")) {
+                songs = initSong(in_s);
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+        }
     }
 
     public Map<Integer, Song> getListSong() {
@@ -65,26 +81,25 @@ public final class Controller {
         }
         Map<Integer, Song> searchMap = new HashMap<>();
         for (Song song : Controller.getInstance().getListSong().values()) {
-            if (containsIgnoreCase(song.getDescription(), searchString)||containsIgnoreCase(song.getText(), searchString)) {
+            if (containsIgnoreCase(song.getDescription(), searchString) || containsIgnoreCase(song.getText(), searchString)) {
                 searchMap.put(song.getNumber(), song);
             }
         }
         return searchMap;
     }
 
-    private Map<Integer, Song> initSong(Context context) {
+    private Map<Integer, Song> initSong(InputStream inputStream) {
         XmlPullParserFactory pullParserFactory;
-
-        try (InputStream in_s = context.getAssets().open("textSong.xml")) {
+        try (InputStream in_s = inputStream) {
             pullParserFactory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = pullParserFactory.newPullParser();
 
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in_s, null);
             return parseXML(parser);
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new HashMap<>();
@@ -120,5 +135,47 @@ public final class Controller {
             eventType = parser.next();
         }
         return songMap;
+    }
+
+    public void updateSong(Context context, IMainActivity mainActivity) {
+
+        new DownloadFileFromURL().execute(context, mainActivity);
+    }
+
+    class DownloadFileFromURL extends AsyncTask<Object, String, String> {
+
+        @Override
+        protected String doInBackground(Object... context) {
+            int count;
+            try {
+                URL url = new URL("http://files.d-lan.dp.ua/download3.php?a=be7d46fc789dd408e12372141b85162b&c=15171&b=20727036807294beeacc08ef878c65b5");
+
+                url.openConnection().connect();
+
+                InputStream input = url.openStream();
+                // Output stream
+                OutputStream output = new FileOutputStream(((Context)context[0]).getFilesDir().getAbsolutePath()
+                        + "/fileDownload.xml");
+                byte data[] = new byte[1024];
+                while ((count = input.read(data)) != -1) {
+                    output.write(data, 0, count);
+                }
+                output.flush();
+                output.close();
+                input.close();
+
+            } catch (Exception e) {
+                Log.e("<>Error: ", e.getMessage());
+            }
+
+            try (InputStream inputStream = new FileInputStream(((Context)context[0]).getFilesDir().getAbsolutePath()
+                    + "/fileDownload.xml")) {
+                songs = initSong(inputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //((IMainActivity)context[1]).setListNameSong(songs.values());
+            return null;
+        }
     }
 }
