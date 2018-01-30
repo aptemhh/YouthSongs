@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -27,7 +27,7 @@ public final class Controller {
 
     private static final Controller CONTROLLER = new Controller();
     private static final Pattern PATTERN = Pattern.compile("^\\d$");
-    private Map<Integer, Song> songs;
+    private List<Song> songs;
 
     private Controller() {
     }
@@ -52,43 +52,44 @@ public final class Controller {
 
     public void loadResource(Context context) {
 
-        try (InputStream in_s = new FileInputStream(context.getFilesDir().getAbsolutePath()
-                + "/fileDownload.xml")) {
-            songs = initSong(in_s);
-        } catch (IOException e) {
+//        try (InputStream in_s = new FileInputStream(context.getFilesDir().getAbsolutePath()
+//                + "/fileDownload.xml")) {
+//            songs = initSong(in_s);
+//        } catch (IOException e) {
             try (InputStream in_s = context.getAssets().open("textSong.xml")) {
                 songs = initSong(in_s);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-        }
+//        }
     }
 
-    public Map<Integer, Song> getListSong() {
+    public List<Song> getListSong() {
         return songs;
     }
 
     public String getSongText(final Integer number) {
+        Log.i("<>","Поиск песни по номеру" + number);
         return songs.get(number).getText();
     }
 
-    public Map<Integer, Song> find(String searchString) {
+    public List<Song> find(String searchString) {
         if (PATTERN.matcher(searchString).matches()) {
             Song song = songs.get(Integer.parseInt(searchString));
             if (song == null)
-                return new HashMap<>();
-            return Collections.singletonMap(song.getNumber(), song);
+                return new ArrayList<>();
+            return Collections.singletonList(song);
         }
-        Map<Integer, Song> searchMap = new HashMap<>();
-        for (Song song : Controller.getInstance().getListSong().values()) {
+        List <Song> searchMap = new ArrayList<>();
+        for (Song song : getListSong()) {
             if (containsIgnoreCase(song.getDescription(), searchString) || containsIgnoreCase(song.getText(), searchString)) {
-                searchMap.put(song.getNumber(), song);
+                searchMap.add(song);
             }
         }
         return searchMap;
     }
 
-    private Map<Integer, Song> initSong(InputStream inputStream) {
+    private List initSong(InputStream inputStream) {
         XmlPullParserFactory pullParserFactory;
         try (InputStream in_s = inputStream) {
             pullParserFactory = XmlPullParserFactory.newInstance();
@@ -102,11 +103,11 @@ public final class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new HashMap<>();
+        return new ArrayList();
     }
 
-    private Map<Integer, Song> parseXML(XmlPullParser parser) throws XmlPullParserException, IOException {
-        Map<Integer, Song> songMap = null;
+    private List parseXML(XmlPullParser parser) throws XmlPullParserException, IOException {
+        ArrayList<Song> songList = null;
         int eventType = parser.getEventType();
         Song song = null;
         Integer id = 1;
@@ -114,7 +115,7 @@ public final class Controller {
             String name;
             switch (eventType) {
                 case XmlPullParser.START_DOCUMENT:
-                    songMap = new HashMap<>();
+                    songList = new ArrayList<>();
                     break;
                 case XmlPullParser.START_TAG:
                     name = parser.getName();
@@ -129,16 +130,15 @@ public final class Controller {
                 case XmlPullParser.END_TAG:
                     name = parser.getName();
                     if (name.equalsIgnoreCase("song") && song != null) {
-                        songMap.put(song.getNumber(), song);
+                        songList.add(song);
                     }
             }
             eventType = parser.next();
         }
-        return songMap;
+        return songList;
     }
 
     public void updateSong(Context context, IMainActivity mainActivity) {
-
         new DownloadFileFromURL().execute(context, mainActivity);
     }
 
@@ -148,7 +148,7 @@ public final class Controller {
         protected String doInBackground(Object... context) {
             int count;
             try {
-                URL url = new URL("http://files.d-lan.dp.ua/download3.php?a=be7d46fc789dd408e12372141b85162b&c=15171&b=20727036807294beeacc08ef878c65b5");
+                URL url = new URL("http://files.d-lan.dp.ua/download3.php?a=be7d46fc789dd408e12372141b85162b&c=15173&b=20727036807294beeacc08ef878c65b5");
 
                 url.openConnection().connect();
 

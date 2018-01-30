@@ -7,16 +7,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements IMainActivity {
 
     public final static String NUMBER_SONG = "NUMBER_SONG";
     Intent intent;
     ArrayAdapter<Song> adapter;
-
+    ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,17 +25,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
 
         intent = new Intent(this, TextSong.class);
 
-        ListView listView = findViewById(R.id.list_description);
+        listView = findViewById(R.id.list_description);
         // установка списка всех песен
-        adapter = new ArrayAdapter<>(this,
+        adapter = new ArrayAdapter<Song>(this,
                 R.layout.list_name_song,
-                Controller.getInstance().getListSong().values().toArray(new Song[]{}));
+                new ArrayList(Controller.getInstance().getListSong()));
 
         listView.setAdapter(adapter);
 
         //переход по номеру песни из списка к песне
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            intent.putExtra(NUMBER_SONG, Integer.parseInt(((String) ((TextView) view).getText()).split(" ")[0]));
+            intent.putExtra(NUMBER_SONG, ((Song)((ListView) parent).getAdapter().getItem((int)id)).getNumber());
             startActivity(intent);
         });
 
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
              */
             @Override
             public boolean onQueryTextSubmit(String s) {
-                setListNameSong(Controller.getInstance().find(s).values());
+                setListNameSong(Controller.getInstance().find(s));
                 return true;
             }
 
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
              */
             @Override
             public boolean onQueryTextChange(String s) {
-                return true;
+                return false;
             }
         });
 
@@ -68,18 +68,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
          * После закрытия поисковика востановить список
          */
         searchView.setOnCloseListener(() -> {
-            setListNameSong(Controller.getInstance().getListSong().values());
-            return true;
+            setListNameSong(Controller.getInstance().getListSong());
+            return false;
         });
         Button button = findViewById(R.id.button2);
-        button.setOnClickListener(view -> {
-            Controller.getInstance().updateSong(getApplicationContext(), this);
-        });
+        button.setOnClickListener(view -> Controller.getInstance().updateSong(getApplicationContext(), this));
     }
 
-    public void setListNameSong(Collection collection)
+    public void setListNameSong(List<Song> listNameSong)
     {
-        adapter.clear();
-        adapter.addAll((Song[]) collection.toArray(new Song[]{}));
+       adapter.clear();
+       adapter.addAll(listNameSong);
+       adapter.notifyDataSetChanged();
     }
 }
