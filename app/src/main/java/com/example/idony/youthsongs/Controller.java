@@ -142,13 +142,13 @@ public final class Controller {
         new DownloadFileFromURL().execute(context, mainActivity);
     }
 
-    class DownloadFileFromURL extends AsyncTask<Object, String, String> {
+    class DownloadFileFromURL extends AsyncTask<Object, IMainActivity, IMainActivity> {
 
         @Override
-        protected String doInBackground(Object... context) {
+        protected IMainActivity doInBackground(Object... context) {
             int count;
             try {
-                URL url = new URL("http://files.d-lan.dp.ua/download3.php?a=be7d46fc789dd408e12372141b85162b&c=15173&b=20727036807294beeacc08ef878c65b5");
+                URL url = new URL("http://10.0.2.2:8080/rest/download");
 
                 url.openConnection().connect();
 
@@ -174,8 +174,13 @@ public final class Controller {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            //((IMainActivity)context[1]).setListNameSong(songs.values());
-            return null;
+
+            return ((IMainActivity)context[1]);
+        }
+
+        @Override
+        protected void onPostExecute(IMainActivity s) {
+            s.setListNameSong(songs);
         }
     }
 }
