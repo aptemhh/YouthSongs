@@ -69,8 +69,7 @@ public final class Controller {
     }
 
     public String getSongText(final Integer number) {
-        Log.i("<>","Поиск песни по номеру" + number);
-        return songs.get(number).getText();
+        return songs.get(number - 1).getText();
     }
 
     public List<Song> find(String searchString) {
