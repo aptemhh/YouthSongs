@@ -52,16 +52,16 @@ public final class Controller {
 
     public void loadResource(Context context) {
 
-//        try (InputStream in_s = new FileInputStream(context.getFilesDir().getAbsolutePath()
-//                + "/fileDownload.xml")) {
-//            songs = initSong(in_s);
-//        } catch (IOException e) {
+        try (InputStream in_s = new FileInputStream(context.getFilesDir().getAbsolutePath()
+                + "/fileDownload.xml")) {
+            songs = initSong(in_s);
+        } catch (IOException e) {
             try (InputStream in_s = context.getAssets().open("textSong.xml")) {
                 songs = initSong(in_s);
             } catch (IOException ee) {
                 ee.printStackTrace();
             }
-//        }
+        }
     }
 
     public List<Song> getListSong() {
@@ -147,7 +147,7 @@ public final class Controller {
         protected IMainActivity doInBackground(Object... context) {
             int count;
             try {
-                URL url = new URL("http://10.0.2.2:8080/rest/download");
+                URL url = new URL(((Context)context[0]).getResources().getText(R.string.url).toString());
 
                 url.openConnection().connect();
 

@@ -18,15 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button"
-            tools:layout_editor_absoluteX="212dp"
-            tools:layout_editor_absoluteY="30dp"
-            android:visibility="gone"/>
-
         <SearchView
             android:id="@+id/searcher"
             android:layout_width="match_parent"

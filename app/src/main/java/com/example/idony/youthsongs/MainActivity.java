@@ -3,8 +3,9 @@ package com.example.idony.youthsongs;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
 
@@ -71,8 +72,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
             setListNameSong(Controller.getInstance().getListSong());
             return false;
         });
-        Button button = findViewById(R.id.button2);
-        button.setOnClickListener(view -> Controller.getInstance().updateSong(getApplicationContext(), this));
     }
 
     public void setListNameSong(List<Song> listNameSong)
@@ -80,5 +79,17 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
        adapter.clear();
        adapter.addAll(listNameSong);
        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Controller.getInstance().updateSong(getApplicationContext(), this);
+        return true;
     }
 }
