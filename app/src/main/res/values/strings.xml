@@ -3,4 +3,5 @@
     <integer name="min_value_seek_bar">20</integer>
     <string name="refresh">Обновить</string>
     <string name="url">http://youth-songs.ru:8780/rest/download</string>
+    <string name="app_name_rus">Молодежные песни</string>
 </resources>
